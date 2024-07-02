@@ -1,18 +1,8 @@
-# File ini akan mengelola proses AHP (Analytical Hierarchy Process) untuk menentukan prioritas kriteria dan alternatif.
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from database import session, Kriteria, Alternatif
 
-# Fungsi Konversi String ke Float
-def konversi_ke_float(nilai):
-    try:
-        return float(eval(nilai))
-    except:
-        return float(nilai)
-
-# Fungsi AHP
 class AHP:
     def __init__(self, matriks_perbandingan):
         self.matriks_perbandingan = matriks_perbandingan
@@ -32,8 +22,15 @@ class AHP:
         lambda_max = np.mean(vektor_jumlah_tertimbang / self.bobot_kriteria)
         n = len(self.bobot_kriteria)
         CI = (lambda_max - n) / (n - 1)
-        RI = {1: 0.00, 2: 0.00, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45}  # Indeks Konsistensi Acak
-        self.rasio_konsistensi = CI / RI[n]
+        
+        # Indeks Konsistensi Acak
+        RI = {1: 0.00, 2: 0.00, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49, 11: 1.51, 12: 1.48, 13: 1.56, 14: 1.57, 15: 1.59}
+        
+        if n in RI:
+            self.rasio_konsistensi = CI / RI[n]
+        else:
+            self.rasio_konsistensi = None
+            print(f"Indeks Konsistensi Acak untuk n={n} tidak tersedia.")
 
         return self.bobot_kriteria, self.rasio_konsistensi
 
@@ -46,15 +43,27 @@ class AlternatifAHP:
         self.skor_akhir = np.dot(self.skor, bobot_kriteria)
         return self.skor_akhir
 
+def konversi_ke_float(bobot):
+    if isinstance(bobot, str) and '/' in bobot:
+        pembilang, penyebut = bobot.split('/')
+        return float(pembilang) / float(penyebut)
+    return float(bobot)
+
 # Membaca data dari database dan memproses AHP
 def proses_ahp():
     kriteria_list = session.query(Kriteria).all()
     alternatif_list = session.query(Alternatif).all()
 
-    matriks_perbandingan_kriteria = np.array([[konversi_ke_float(k.bobot) for k in kriteria_list]])
+    matriks_perbandingan_kriteria = np.array([konversi_ke_float(k.bobot) for k in kriteria_list])
+    matriks_perbandingan_kriteria = np.outer(matriks_perbandingan_kriteria, matriks_perbandingan_kriteria)
 
     ahp = AHP(matriks_perbandingan_kriteria)
     bobot_kriteria, rasio_konsistensi = ahp.hitung_bobot()
+
+    if rasio_konsistensi is not None and rasio_konsistensi < 0.1:
+        print(f"Rasio Konsistensi (CR): {rasio_konsistensi} - Konsisten")
+    else:
+        print(f"Rasio Konsistensi (CR): {rasio_konsistensi} - Tidak Konsisten")
 
     alternatif_ahp_list = []
     for alt in alternatif_list:

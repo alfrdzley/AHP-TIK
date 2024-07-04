@@ -1,22 +1,20 @@
-from crud import tambah_kriteria, baca_kriteria, update_kriteria, hapus_kriteria
-from crud import tambah_alternatif, baca_alternatif, update_alternatif, hapus_alternatif
+from crud import tambah_kriteria, tambah_alternatif, baca_kriteria, baca_alternatif
 from ahp import proses_ahp
 
-# Contoh penggunaan CRUD dan AHP
-# Menambahkan kriteria
-tambah_kriteria('Kualitas Pendidikan', 0.5)
-tambah_kriteria('Fasilitas', 0.3)
-tambah_kriteria('Reputasi', 0.2)
 
-# Membaca kriteria
+# Tambahkan kriteria
+tambah_kriteria("Biaya", 1/3)
+tambah_kriteria("Fasilitas", 3)
+tambah_kriteria("Kualitas", 1)
+
+# Tambahkan alternatif dengan skor
+tambah_alternatif("Kampus A", [0.2, 0.4, 0.4])
+tambah_alternatif("Kampus B", [0.4, 0.3, 0.3])
+tambah_alternatif("Kampus C", [0.4, 0.3, 0.3])
+
+# Baca data kriteria dan alternatif
 baca_kriteria()
-
-# Menambahkan alternatif
-tambah_alternatif('Universitas A', [0.8, 0.7, 0.9])
-tambah_alternatif('Universitas B', [0.6, 0.8, 0.7])
-
-# Membaca alternatif
 baca_alternatif()
 
-# Memproses AHP
+# Proses AHP
 proses_ahp()

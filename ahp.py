@@ -67,7 +67,9 @@ def proses_ahp():
 
     alternatif_ahp_list = []
     for alt in alternatif_list:
-        skor = np.array(eval(alt.skor))  # Konversi string JSON ke list
+        skor = np.array(alt.skor)  # Pastikan skor adalah list float
+        if len(skor) != len(bobot_kriteria):
+            raise ValueError(f"Jumlah skor ({len(skor)}) tidak sesuai dengan jumlah kriteria ({len(bobot_kriteria)})")
         alternatif_ahp_list.append(AlternatifAHP(alt.nama, skor))
 
     for alt_ahp in alternatif_ahp_list:
